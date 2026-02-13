@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { v4: uuidv4 } = require("uuid");
-const pool = require("../db");
+const pool = require("../config/db");
 
 /* ---------------- CREATE BOUQUET ---------------- */
 router.post("/", async (req, res) => {
