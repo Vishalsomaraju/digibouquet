@@ -78,7 +78,7 @@ export default function View() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/bouquet/${id}`)
+      .get(`https://digibouquet.onrender.com/api/bouquet/${id}`)
       .then((res) => setBouquet(res.data));
   }, [id]);
 
