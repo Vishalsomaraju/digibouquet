@@ -193,13 +193,29 @@ export default function View() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
             className="relative -mt-28 z-10
-              bg-white/90 backdrop-blur-md
-              w-[92%] sm:w-[420px]
-              rounded-2xl
-              shadow-[0_30px_80px_rgba(0,0,0,0.18)]
-              px-8 py-8 font-serif"
+      w-[92%] sm:w-[420px]
+      rounded-2xl
+      px-8 py-8 font-serif
+      bg-[#f9f6f2]
+      shadow-[0_30px_80px_rgba(0,0,0,0.18)]"
           >
-            <div className="text-[#5c4b43]">
+            {/* 📜 Paper Lines */}
+            <div
+              className="absolute inset-0 rounded-2xl pointer-events-none"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to bottom, rgba(90,150,255,0.08) 1px, transparent 1px)",
+                backgroundSize: "100% 34px",
+              }}
+            />
+
+            {/* 📎 Left Margin Line */}
+            <div className="absolute left-6 top-0 bottom-0 w-[3px] bg-pink-300 opacity-60 rounded-full" />
+
+            {/* 🌸 Soft Paper Noise Glow */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/40 via-transparent to-rose-50/30 pointer-events-none" />
+
+            <div className="relative z-10 text-[#5c4b43]">
               {bouquet.message.to && (
                 <div className="text-left text-rose-900 text-lg mb-6">
                   To my beloved, {bouquet.message.to}
