@@ -89,14 +89,14 @@ export default function Shared() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
           <button
             onClick={copyLink}
-            className="px-6 py-3 bg-rose-700 text-white rounded-full hover:scale-105 transition shadow-md"
+            className="px-6 py-3 bg-rose-700 text-white rounded-full hover:scale-105 transition shadow-md cursor-pointer"
           >
             Copy Link 🔗
           </button>
 
           <button
             onClick={() => navigate(`/view/${id}`)}
-            className="px-6 py-3 border border-rose-700 text-rose-700 rounded-full hover:bg-rose-50 transition"
+            className="px-6 py-3 border border-rose-700 text-rose-700 rounded-full hover:bg-rose-50 transition cursor-pointer "
           >
             View as Recipient →
           </button>
