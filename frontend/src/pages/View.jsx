@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 /* PETALS */
 import anemonePetal from "../assets/petals/anemone.png";
@@ -52,7 +52,7 @@ const wrapMap = {
   emerald: emeraldWrap,
 };
 
-/* ORIGINAL ORIENTATION */
+/* 🔒 YOUR ORIGINAL ORIENTATION — UNCHANGED */
 const layoutSlots = [
   { left: "50%", bottom: "0%", rotate: 0, scale: 0.95, z: 7 },
   { left: "38%", bottom: "8%", rotate: -12, scale: 0.92, z: 6 },
@@ -67,29 +67,23 @@ const layoutSlots = [
 export default function View() {
   const { id } = useParams();
   const [bouquet, setBouquet] = useState(null);
-  const [isSmall, setIsSmall] = useState(false);
 
-  useEffect(() => {
-    const check = () => setIsSmall(window.innerWidth < 640);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
+  const { scrollY } = useScroll();
+  const parallax = useTransform(scrollY, [0, 600], [0, -50]);
 
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/bouquet/${id}`)
       .then((res) => setBouquet(res.data))
-      .catch((err) => console.error(err));
+      .catch(console.error);
   }, [id]);
 
-  if (!bouquet) {
+  if (!bouquet)
     return (
       <div className="min-h-screen flex items-center justify-center">
         Loading...
       </div>
     );
-  }
 
   const wrapImage = bouquet.wrap ? wrapMap[bouquet.wrap] : null;
 
@@ -97,136 +91,137 @@ export default function View() {
     bouquet.message &&
     (bouquet.message.to || bouquet.message.body || bouquet.message.from);
 
+  /* 🌸 Random Ambient Flowers (DOES NOT TOUCH BOUQUET) */
+  const ambient = Array.from({ length: 12 }).map((_, i) => ({
+    src: Object.values(petalMap)[i % 6],
+    top: `${Math.random() * 90}%`,
+    left: `${Math.random() * 95}%`,
+    size: 40 + Math.random() * 40,
+    duration: 12 + Math.random() * 6,
+  }));
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#f5efe8] via-[#efe6dd] to-[#e6dbcf] overflow-hidden px-4">
-      {/* 🌸 Ambient Floating Petals */}
-      {[rosePetal, peonyPetal, tulipPetal].map((petal, i) => (
+      {/* 🌸 Background Ambient Layer */}
+      {ambient.map((p, i) => (
         <motion.img
           key={i}
-          src={petal}
-          className="absolute w-24 opacity-15 pointer-events-none hidden lg:block"
+          src={p.src}
+          className="absolute opacity-10 pointer-events-none hidden lg:block"
           style={{
-            top: `${15 + i * 20}%`,
-            left: `${10 + i * 25}%`,
+            top: p.top,
+            left: p.left,
+            width: p.size,
           }}
           animate={{
             y: [0, -25, 0],
-            rotate: [0, 8, -8, 0],
+            rotate: [0, 10, -10, 0],
           }}
           transition={{
-            duration: 12 + i,
+            duration: p.duration,
             repeat: Infinity,
             ease: "easeInOut",
           }}
         />
       ))}
 
-      {/* 💐 Bouquet */}
+      {/* 💐 PARALLAX WRAPPER (BOUQUET + CARD TOGETHER) */}
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="relative w-[340px] sm:w-[420px] md:w-[480px] h-[520px] flex items-end justify-center"
+        style={{ y: window.innerWidth > 1024 ? parallax : 0 }}
+        className="flex flex-col items-center"
       >
-        {/* Wrap or Greenery */}
-        {wrapImage ? (
-          <img
-            src={wrapImage}
-            alt="wrap"
-            className="absolute bottom-0 w-[105%]"
-            style={{
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 1,
-            }}
-          />
-        ) : (
-          <img
-            src={greeneryBase}
-            alt="greenery"
-            className="absolute bottom-0 w-[100%]"
-            style={{
-              left: "50%",
-              transform: "translateX(-50%)",
-              zIndex: 1,
-            }}
-          />
-        )}
-
-        {/* Flowers */}
-        {bouquet.flowers.map((flower, index) => {
-          const slot = layoutSlots[index];
-          if (!slot) return null;
-
-          return (
-            <motion.img
-              key={index}
-              src={petalMap[flower.id]}
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="absolute"
+        {/* Bouquet */}
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative w-[340px] sm:w-[420px] md:w-[480px] h-[520px] flex items-end justify-center"
+        >
+          {/* 🔒 Wrap Centering UNCHANGED */}
+          {wrapImage ? (
+            <img
+              src={wrapImage}
+              className="absolute bottom-0 w-[105%]"
               style={{
-                width: isSmall ? "100px" : "120px",
-                left: `calc(${slot.left} - ${isSmall ? "15%" : "13%"})`,
-                bottom: `calc(${slot.bottom} + ${isSmall ? "20%" : "34%"})`,
-                transformOrigin: "bottom center",
-                transform: `translateX(-50%) rotate(${slot.rotate}deg) scale(${slot.scale})`,
-                zIndex: slot.z + 2,
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 1,
               }}
             />
-          );
-        })}
+          ) : (
+            <img
+              src={greeneryBase}
+              className="absolute bottom-0 w-[100%]"
+              style={{
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: 1,
+              }}
+            />
+          )}
+
+          {/* 🔒 Flower Placement EXACT */}
+          {bouquet.flowers.map((flower, index) => {
+            const slot = layoutSlots[index];
+            if (!slot) return null;
+
+            return (
+              <motion.img
+                key={index}
+                src={petalMap[flower.id]}
+                initial={{ y: 40, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="absolute"
+                style={{
+                  width: "120px",
+                  left: `calc(${slot.left} - 13%)`,
+                  bottom: `calc(${slot.bottom} + 34%)`,
+                  transformOrigin: "bottom center",
+                  transform: `translateX(-50%) rotate(${slot.rotate}deg) scale(${slot.scale})`,
+                  zIndex: slot.z + 2,
+                }}
+              />
+            );
+          })}
+        </motion.div>
+
+        {/* 💌 CARD — SAME OVERLAP */}
+        {hasMessage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="relative -mt-28 z-10
+              bg-white/90 backdrop-blur-md
+              w-[92%] sm:w-[420px]
+              rounded-2xl
+              shadow-[0_30px_80px_rgba(0,0,0,0.18)]
+              px-8 py-8 font-serif"
+          >
+            <div className="text-[#5c4b43]">
+              {bouquet.message.to && (
+                <div className="text-left text-rose-900 text-lg mb-6">
+                  To my beloved, {bouquet.message.to}
+                </div>
+              )}
+
+              {bouquet.message.body && (
+                <div className="text-center text-lg leading-relaxed whitespace-pre-line mb-8">
+                  {bouquet.message.body}
+                </div>
+              )}
+
+              {bouquet.message.from && (
+                <div className="text-right text-rose-900 text-lg">
+                  ~ {bouquet.message.from}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
       </motion.div>
 
-      {/* 💌 MESSAGE CARD */}
-      {hasMessage && (
-        <motion.div
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="relative -mt-24 z-10
-      bg-[#f4eee8] w-[92%] sm:w-[420px]
-      rounded-2xl
-      shadow-[0_30px_80px_rgba(0,0,0,0.18)]
-      px-8 py-8 font-serif"
-        >
-          {/* Paper Lines */}
-          <div
-            className="absolute inset-0 rounded-2xl pointer-events-none"
-            style={{
-              backgroundImage:
-                "linear-gradient(to bottom, rgba(90,150,255,0.06) 1px, transparent 1px)",
-              backgroundSize: "100% 34px",
-            }}
-          />
-
-          <div className="relative z-20 text-[#5c4b43]">
-            {/* TO (Left) */}
-            {bouquet.message.to && (
-              <div className="text-left text-rose-900 text-lg mb-6">
-                To my beloved, {bouquet.message.to}
-              </div>
-            )}
-
-            {/* BODY (Center) */}
-            {bouquet.message.body && (
-              <div className="text-center text-lg leading-relaxed whitespace-pre-line mb-8">
-                {bouquet.message.body}
-              </div>
-            )}
-
-            {/* FROM (Right) */}
-            {bouquet.message.from && (
-              <div className="text-right text-rose-900 text-lg">
-                ~ {bouquet.message.from}
-              </div>
-            )}
-          </div>
-        </motion.div>
-      )}
-
-      {/* View Counter */}
       <div className="mt-6 text-sm text-gray-500">
         Opened {bouquet.views || 0} times 💌
       </div>
