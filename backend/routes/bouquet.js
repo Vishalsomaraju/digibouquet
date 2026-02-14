@@ -35,19 +35,26 @@ router.post("/", async (req, res) => {
 });
 
 /* ---------------- GET BOUQUET ---------------- */
+const { validate: isUuid } = require("uuid");
+
 router.get("/:id", async (req, res) => {
   try {
+    const { id } = req.params;
+
+    if (!isUuid(id)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
     const result = await pool.query("SELECT * FROM bouquets WHERE id = $1", [
-      req.params.id,
+      id,
     ]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Not found" });
     }
 
-    // Increment views
     await pool.query("UPDATE bouquets SET views = views + 1 WHERE id = $1", [
-      req.params.id,
+      id,
     ]);
 
     res.json(result.rows[0]);
