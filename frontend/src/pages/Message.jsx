@@ -49,7 +49,7 @@ export default function Message() {
       };
 
       const res = await axios.post(
-        "https://digibouquet.onrender.com/api/bouquet",
+        `${import.meta.env.VITE_API_URL}/api/bouquet`,
         bouquetData,
       );
 
