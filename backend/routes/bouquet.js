@@ -16,14 +16,14 @@ router.post("/", async (req, res) => {
 
     await pool.query(
       `
-      INSERT INTO bouquets (id, flowers, wrap, message)
-      VALUES ($1, $2, $3, $4)
-      `,
+  INSERT INTO bouquets (id, flowers, wrap, message)
+  VALUES ($1, $2::jsonb, $3, $4::jsonb)
+  `,
       [
         id,
-        flowers, // send as object (pg handles jsonb)
+        JSON.stringify(flowers),
         wrap || null,
-        message || {},
+        JSON.stringify(message || {}),
       ],
     );
 
