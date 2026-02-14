@@ -1,48 +1,59 @@
 const express = require("express");
 const router = express.Router();
-const { v4: uuidv4 } = require("uuid");
+const { v4: uuidv4, validate: isUuid } = require("uuid");
 const pool = require("../config/db");
 
-/* ---------------- CREATE BOUQUET ---------------- */
+/* ===============================
+   CREATE BOUQUET
+================================ */
 router.post("/", async (req, res) => {
   try {
     const { flowers, wrap, message } = req.body;
 
-    if (!flowers || !Array.isArray(flowers)) {
-      return res.status(400).json({ error: "Invalid flowers data" });
+    // Validate flowers
+    if (!Array.isArray(flowers) || flowers.length === 0) {
+      return res.status(400).json({
+        error: "Flowers must be a non-empty array",
+      });
     }
 
     const id = uuidv4();
 
     await pool.query(
       `
-  INSERT INTO bouquets (id, flowers, wrap, message)
-  VALUES ($1, $2::jsonb, $3, $4::jsonb)
-  `,
+      INSERT INTO bouquets (id, flowers, wrap, message, views)
+      VALUES ($1, $2::jsonb, $3, $4::jsonb, 0)
+      `,
       [
         id,
         JSON.stringify(flowers),
         wrap || null,
-        JSON.stringify(message || {}),
+        message ? JSON.stringify(message) : null,
       ],
     );
 
-    res.json({ id });
+    return res.status(201).json({ id });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    console.error("CREATE ERROR:", err);
+
+    return res.status(500).json({
+      error: "Database insert failed",
+      details: err.message,
+    });
   }
 });
 
-/* ---------------- GET BOUQUET ---------------- */
-const { validate: isUuid } = require("uuid");
-
+/* ===============================
+   GET BOUQUET
+================================ */
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!isUuid(id)) {
-      return res.status(400).json({ error: "Invalid ID format" });
+      return res.status(400).json({
+        error: "Invalid ID format",
+      });
     }
 
     const result = await pool.query("SELECT * FROM bouquets WHERE id = $1", [
@@ -50,17 +61,25 @@ router.get("/:id", async (req, res) => {
     ]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Not found" });
+      return res.status(404).json({
+        error: "Bouquet not found",
+      });
     }
 
-    await pool.query("UPDATE bouquets SET views = views + 1 WHERE id = $1", [
-      id,
-    ]);
+    // Increment views safely
+    await pool.query(
+      "UPDATE bouquets SET views = COALESCE(views, 0) + 1 WHERE id = $1",
+      [id],
+    );
 
-    res.json(result.rows[0]);
+    return res.status(200).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    console.error("GET ERROR:", err);
+
+    return res.status(500).json({
+      error: "Database fetch failed",
+      details: err.message,
+    });
   }
 });
 
