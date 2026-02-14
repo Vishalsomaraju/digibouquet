@@ -192,41 +192,45 @@ export default function View() {
       {/* 💌 MESSAGE CARD */}
       {hasMessage && (
         <motion.div
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="relative -mt-24 z-10
-      bg-[#f4eee8] w-[92%] sm:w-[420px]
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="relative -mt-28 z-10
+      w-[92%] sm:w-[420px]
       rounded-2xl
-      shadow-[0_30px_80px_rgba(0,0,0,0.18)]
-      px-8 py-8 font-serif"
+      px-8 py-8 font-serif
+      bg-[#f9f6f2]
+      shadow-[0_30px_80px_rgba(0,0,0,0.18)]"
         >
-          {/* Paper Lines */}
+          {/* 📜 Paper Lines */}
           <div
             className="absolute inset-0 rounded-2xl pointer-events-none"
             style={{
               backgroundImage:
-                "linear-gradient(to bottom, rgba(90,150,255,0.06) 1px, transparent 1px)",
+                "linear-gradient(to bottom, rgba(90,150,255,0.08) 1px, transparent 1px)",
               backgroundSize: "100% 34px",
             }}
           />
 
-          <div className="relative z-20 text-[#5c4b43]">
-            {/* TO (Left) */}
+          {/* 📎 Left Margin Line */}
+          <div className="absolute left-6 top-0 bottom-0 w-[3px] bg-pink-300 opacity-60 rounded-full" />
+
+          {/* 🌸 Soft Paper Noise Glow */}
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/40 via-transparent to-rose-50/30 pointer-events-none" />
+
+          <div className="relative z-10 text-[#5c4b43]">
             {bouquet.message.to && (
               <div className="text-left text-rose-900 text-lg mb-6">
                 To my beloved, {bouquet.message.to}
               </div>
             )}
 
-            {/* BODY (Center) */}
             {bouquet.message.body && (
               <div className="text-center text-lg leading-relaxed whitespace-pre-line mb-8">
                 {bouquet.message.body}
               </div>
             )}
 
-            {/* FROM (Right) */}
             {bouquet.message.from && (
               <div className="text-right text-rose-900 text-lg">
                 ~ {bouquet.message.from}
