@@ -1,4 +1,3 @@
-every thing works , now some ui tweeks , add more floating animated flowers randomly placed in view , and lets try patalax effect only if the whole thing petals , wrap and card moves to gether 
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -98,7 +97,7 @@ export default function View() {
     bouquet.message &&
     (bouquet.message.to || bouquet.message.body || bouquet.message.from);
 
-   /* 🌸 Random Ambient Flowers (DOES NOT TOUCH BOUQUET) */
+  /* 🌸 Random Ambient Flowers (DOES NOT TOUCH BOUQUET) */
   const ambient = Array.from({ length: 12 }).map((_, i) => ({
     src: Object.values(petalMap)[i % 6],
     top: `${Math.random() * 90}%`,
@@ -109,7 +108,6 @@ export default function View() {
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#f5efe8] via-[#efe6dd] to-[#e6dbcf] overflow-hidden px-4">
-
       {/* 🌸 Background Ambient Layer */}
       {ambient.map((p, i) => (
         <motion.img
