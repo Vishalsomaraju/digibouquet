@@ -44,7 +44,7 @@ app.use(
 );
 
 /* Handle preflight explicitly */
-app.options("/*", cors());
+app.options("/", cors());
 
 /* ===========================
    MIDDLEWARE
